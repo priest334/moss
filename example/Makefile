@@ -4,7 +4,7 @@
 
 MARCH = $(subst _,-,$(shell arch))
 
-CXXFLAGS = -Wall -Wno-char-subscripts -march=$(MARCH) -fpermissive -std=c++11
+CXXFLAGS = -O2 -Wall -Wno-char-subscripts -march=$(MARCH) -fpermissive -std=c++11
 ifdef DEBUG
 	CXXFLAGS += -g
 endif
