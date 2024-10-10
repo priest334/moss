@@ -52,7 +52,7 @@ namespace moss {
 		timestamp_ = steady_clock::now();
 		task_ = task;
 		auto loop = loop_.lock();
-		if (!loop) {
+		if (!loop || 0 == repeats_) {
 			return -1;
 		}
 		return loop->StartTimer(shared_from_this());
@@ -79,9 +79,7 @@ namespace moss {
 					continue;
 				timer->Run();
 				timer->timestamp_ = now;
-				if (timer->repeats_ <= 0)
-					continue;
-				if (--timer->repeats_ == 0) {
+				if (timer->repeats_ > 0 && --timer->repeats_ == 0) {
 					CloseTimer(timer);
 				}
 			}
@@ -137,15 +135,16 @@ namespace moss {
 	}
 
 	int TimerLoop::CloseTimer(std::shared_ptr<Timer> timer) {
+		int timer_id = -1;
 		if (!timers_)
-			return -1;
+			return timer_id;
 		std::lock_guard<std::mutex> lock(*mutex_);
 		auto it = timers_->find(timer->Id());
 		if (it != timers_->end()) {
+			timer_id = it->second->Id();
 			timers_->erase(it);
-			return it->second->Id();
 		}
-		return 0;
+		return timer_id;
 	}
 } // namespace moss
 
